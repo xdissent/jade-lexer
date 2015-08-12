@@ -47,7 +47,7 @@ Lexer.prototype = {
   constructor: Lexer,
 
   error: function (code, message) {
-    var err = error(code, message, {line: this.lineno, filename: this.filename, src: this.originalInput});
+    var err = error(code, message, {line: this.lineno, column: this.colno, filename: this.filename, src: this.originalInput});
     throw err;
   },
 
