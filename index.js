@@ -92,6 +92,23 @@ Lexer.prototype = {
   },
 
   /**
+   * Increment `this.lineno` and reset `this.colno`.
+   *
+   * @param {Number} increment
+   * @api private
+  **/
+
+  incrementLine: function(increment){
+    if (increment !== undefined) {
+      this.lineno += increment;
+    } else {
+      ++this.lineno;
+    }
+
+    this.colno = null;
+  },
+
+  /**
    * Consume the given `len` of input.
    *
    * @param {Number} len
@@ -179,7 +196,7 @@ Lexer.prototype = {
     var captures;
     if (captures = /^\n[ \t]*\n/.exec(this.input)) {
       this.consume(captures[0].length - 1);
-      ++this.lineno;
+      this.incrementLine();
       if (this.pipeless) this.tokens.push(this.tok('text', ''));
       return true;
     }
@@ -782,7 +799,7 @@ Lexer.prototype = {
         }
       }
 
-      this.lineno += str.split("\n").length - 1;
+      this.incrementLine(str.split("\n").length - 1);
 
       for (var i = 0; i <= str.length; i++) {
         if (isEndOfAttribute(i)) {
@@ -901,7 +918,7 @@ Lexer.prototype = {
       var tok
         , indents = captures[1].length;
 
-      ++this.lineno;
+      this.incrementLine();
       this.consume(indents + 1);
 
       if (' ' == this.input[0] || '\t' == this.input[0]) {
@@ -983,7 +1000,7 @@ Lexer.prototype = {
       } while(this.input.length && isMatch);
       while (this.input.length === 0 && tokens[tokens.length - 1] === '') tokens.pop();
       tokens.forEach(function (token, i) {
-        this.lineno++;
+        this.incrementLine();
         if (i !== 0) this.tokens.push(this.tok('newline'));
         this.addText(token);
       }.bind(this));
