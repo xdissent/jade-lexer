@@ -29,6 +29,7 @@ function Lexer(str, filename, options) {
   this.interpolated = options.interpolated || false;
   this.lastIndents = 0;
   this.lineno = options.startingLine || 1;
+  this.colno = null;
   this.indentStack = [];
   this.indentRe = null;
   this.pipeless = false;
