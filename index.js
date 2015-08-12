@@ -83,9 +83,12 @@ Lexer.prototype = {
    */
 
   tok: function(type, val){
-    return val === undefined ?
-      {type: type, line: this.lineno} :
-      {type: type, line: this.lineno, val: val};
+    var res = {type: type, line: this.lineno};
+
+    if (val !== undefined) res.val = val;
+    if (this.colno !== null) res.col = this.colno;
+
+    return res;
   },
 
   /**
