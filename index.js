@@ -82,11 +82,13 @@ Lexer.prototype = {
    * @api private
    */
 
-  tok: function(type, val){
+  tok: function(type, val, columnIncrement){
     var res = {type: type, line: this.lineno};
 
     if (this.colno !== null) res.col = this.colno;
     if (val !== undefined) res.val = val;
+
+    if (columnIncrement !== undefined) this.incrementColumn(columnIncrement);
 
     return res;
   },
@@ -146,9 +148,11 @@ Lexer.prototype = {
   scan: function(regexp, type){
     var captures;
     if (captures = regexp.exec(this.input)) {
-      this.consume(captures[0].length);
-      this.incrementColumn(captures[0].length - captures[1].length)
-      return this.tok(type, captures[1]);
+      var len = captures[0].length;
+      var val = captures[1];
+      var diff = len - (val ? val.length : 0);
+      this.consume(len);
+      return this.tok(type, val, diff);
     }
   },
   scanEndOfLine: function (regexp, type) {
@@ -256,10 +260,9 @@ Lexer.prototype = {
     if (captures = /^(\w(?:[-:\w]*\w)?)(\/?)/.exec(this.input)) {
       var tok, len = captures[0].length, name = captures[1];
       this.consume(len);
-      tok = this.tok('tag', name);
+      tok = this.tok('tag', name, len);
       tok.selfClosing = !!captures[2];
       this.tokens.push(tok);
-      this.incrementColumn(len);
       return true;
     }
   },
