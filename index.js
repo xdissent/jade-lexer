@@ -109,6 +109,21 @@ Lexer.prototype = {
   },
 
   /**
+   * Increment `this.colno`.
+   *
+   * @param {Number} increment
+   * @api private
+  **/
+
+  incrementColumn: function(increment){
+    if (increment !== undefined) {
+      this.colno += increment;
+    } else {
+      ++this.colno;
+    }
+  },
+
+  /**
    * Consume the given `len` of input.
    *
    * @param {Number} len
