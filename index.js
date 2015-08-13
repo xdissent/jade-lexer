@@ -815,8 +815,10 @@ Lexer.prototype = {
           }
         }
       }
+      var currentColumn = this.colno;
 
       this.incrementLine(str.split("\n").length - 1);
+      this.colno = currentColumn;
 
       for (var i = 0; i <= str.length; i++) {
         if (isEndOfAttribute(i)) {
