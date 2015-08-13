@@ -383,7 +383,10 @@ Lexer.prototype = {
       return;
     }
 
-    this.tokens.push(this.tok('text', prefix + value));
+    value = prefix + value;
+
+    this.tokens.push(this.tok('text', value));
+    this.incrementColumn(value.length);
   },
 
   text: function() {
