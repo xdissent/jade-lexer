@@ -253,11 +253,12 @@ Lexer.prototype = {
   tag: function() {
     var captures;
     if (captures = /^(\w(?:[-:\w]*\w)?)(\/?)/.exec(this.input)) {
-      this.consume(captures[0].length);
-      var tok, name = captures[1];
+      var tok, len = captures[0].length, name = captures[1];
+      this.consume(len);
       tok = this.tok('tag', name);
       tok.selfClosing = !!captures[2];
       this.tokens.push(tok);
+      this.incrementColumn(len);
       return true;
     }
   },
