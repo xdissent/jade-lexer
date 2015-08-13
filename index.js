@@ -105,7 +105,7 @@ Lexer.prototype = {
       ++this.lineno;
     }
 
-    this.colno = null;
+    this.colno = 1;
   },
 
   /**
