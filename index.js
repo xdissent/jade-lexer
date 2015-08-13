@@ -935,15 +935,18 @@ Lexer.prototype = {
       if (this.indentStack.length && indents < this.indentStack[0]) {
         while (this.indentStack.length && this.indentStack[0] > indents) {
           this.tokens.push(this.tok('outdent'));
+          this.colno = this.indentStack[0] - 1;
           this.indentStack.shift();
         }
       // indent
       } else if (indents && indents != this.indentStack[0]) {
-        this.indentStack.unshift(indents);
         this.tokens.push(this.tok('indent', indents));
+        this.colno = 1 + indents;
+        this.indentStack.unshift(indents);
       // newline
       } else {
         this.tokens.push(this.tok('newline'));
+        this.colno = 1 + (this.indentStack[0] || 0);
       }
 
       this.pipeless = false;
