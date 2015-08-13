@@ -147,6 +147,7 @@ Lexer.prototype = {
     var captures;
     if (captures = regexp.exec(this.input)) {
       this.consume(captures[0].length);
+      this.incrementColumn(captures[0].length - captures[1].length)
       return this.tok(type, captures[1]);
     }
   },
