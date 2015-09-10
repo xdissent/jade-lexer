@@ -200,6 +200,9 @@ Lexer.prototype = {
 
   eos: function() {
     if (this.input.length) return;
+    if (this.interpolated) {
+      this.error('NO_END_BRACKET', 'End of line was reached with no closing bracket for interpolation.');
+    }
     for (var i = 0; i < this.indentStack.length; i++) {
       this.tokens.push(this.tok('outdent'));
     }
@@ -367,12 +370,7 @@ Lexer.prototype = {
         startingLine: this.lineno
       });
       var interpolated = child.getTokens();
-      for (var i = 0; i < interpolated.length; i++) {
-        this.tokens.push(interpolated[i]);
-        if (interpolated[i].type === 'eos') {
-          this.error('NO_END_BRACKET', 'End of line was reached with no closing bracket for interpolation.');
-        }
-      }
+      this.tokens.push.apply(this.tokens, interpolated);
       this.tokens.push(this.tok('end-jade-interpolation'));
       this.addText(child.input);
       return;
@@ -713,7 +711,7 @@ Lexer.prototype = {
 
   each: function() {
     var captures;
-    if (captures = /^(?:- *)?(?:each|for) +([a-zA-Z_$][\w$]*)(?: *, *([a-zA-Z_$][\w$]*))? * in *([^\n]+)/.exec(this.input)) {
+    if (captures = /^(?:each|for) +([a-zA-Z_$][\w$]*)(?: *, *([a-zA-Z_$][\w$]*))? * in *([^\n]+)/.exec(this.input)) {
       this.consume(captures[0].length);
       var tok = this.tok('each', captures[1]);
       tok.key = captures[2];
@@ -734,13 +732,24 @@ Lexer.prototype = {
   code: function() {
     var captures;
     if (captures = /^(!?=|-)[ \t]*([^\n]+)/.exec(this.input)) {
-      this.consume(captures[0].length);
       var flags = captures[1];
-      captures[1] = captures[2];
-      var tok = this.tok('code', captures[1]);
+      var code = captures[2];
+      var shortened = 0;
+      if (this.interpolated) {
+        var parsed;
+        try {
+          parsed = characterParser.parseMaxBracket(code, ']');
+        } catch (err) {
+          this.error('NO_END_BRACKET', 'End of line was reached with no closing bracket for interpolation.');
+        }
+        shortened = code.length - parsed.end;
+        code = parsed.src;
+      }
+      this.consume(captures[0].length - shortened);
+      var tok = this.tok('code', code);
       tok.escape = flags.charAt(0) === '=';
       tok.buffer = flags.charAt(0) === '=' || flags.charAt(1) === '=';
-      if (tok.buffer) this.assertExpression(captures[1]);
+      if (tok.buffer) this.assertExpression(code);
       this.tokens.push(tok);
       return true;
     }
