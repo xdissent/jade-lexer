@@ -972,8 +972,8 @@ Lexer.prototype = {
       // outdent
       if (this.indentStack.length && indents < this.indentStack[0]) {
         while (this.indentStack.length && this.indentStack[0] > indents) {
-          this.tokens.push(this.tok('outdent'));
           this.colno = this.indentStack[0] - 1;
+          this.tokens.push(this.tok('outdent'));
           this.indentStack.shift();
         }
       // indent
