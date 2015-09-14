@@ -27,7 +27,6 @@ function Lexer(str, filename, options) {
   this.originalInput = this.input;
   this.filename = filename;
   this.interpolated = options.interpolated || false;
-  this.lastIndents = 0;
   this.lineno = options.startingLine || 1;
   this.colno = options.startingColumn || 1;
   this.indentStack = [];
@@ -60,7 +59,8 @@ Lexer.prototype = {
     try {
       Function('', 'return (' + exp + ')');
     } catch (ex) {
-      this.error('SYNTAX_ERROR', 'Syntax Error');
+      var msg = 'Syntax Error: ' + ex.message;
+      this.error('SYNTAX_ERROR', msg);
     }
   },
 
@@ -185,13 +185,36 @@ Lexer.prototype = {
     var end = ({'(': ')', '{': '}', '[': ']'})[start];
     var range;
     try {
-      range = characterParser.parseMax(this.input, {start: skip + 1});
+      range = characterParser.parseMaxBracket(this.input, end, {start: skip + 1});
     } catch (ex) {
       this.error('BRACKET_MISMATCH', ex.message);
     }
-    this.assert(this.input[range.end] === end,
-           'start character "' + start + '" should match end character "' + this.input[range.end] + '"');
     return range;
+  },
+
+  scanIndentation: function() {
+    var captures, re;
+
+    // established regexp
+    if (this.indentRe) {
+      captures = this.indentRe.exec(this.input);
+    // determine regexp
+    } else {
+      // tabs
+      re = /^\n(\t*) */;
+      captures = re.exec(this.input);
+
+      // spaces
+      if (captures && !captures[1].length) {
+        re = /^\n( *)/;
+        captures = re.exec(this.input);
+      }
+
+      // established
+      if (captures && captures[1].length) this.indentRe = re;
+    }
+
+    return captures;
   },
 
   /**
@@ -370,7 +393,7 @@ Lexer.prototype = {
         startingLine: this.lineno
       });
       var interpolated = child.getTokens();
-      this.tokens.push.apply(this.tokens, interpolated);
+      this.tokens = this.tokens.concat(interpolated);
       this.tokens.push(this.tok('end-jade-interpolation'));
       this.addText(child.input);
       return;
@@ -927,26 +950,7 @@ Lexer.prototype = {
    */
 
   indent: function() {
-    var captures, re;
-
-    // established regexp
-    if (this.indentRe) {
-      captures = this.indentRe.exec(this.input);
-    // determine regexp
-    } else {
-      // tabs
-      re = /^\n(\t*) */;
-      captures = re.exec(this.input);
-
-      // spaces
-      if (captures && !captures[1].length) {
-        re = /^\n( *)/;
-        captures = re.exec(this.input);
-      }
-
-      // established
-      if (captures && captures[1].length) this.indentRe = re;
-    }
+    var captures = this.scanIndentation();
 
     if (captures) {
       var tok
@@ -995,27 +999,7 @@ Lexer.prototype = {
 
   pipelessText: function() {
     if (!this.pipeless) return;
-    var captures, re;
-
-    // established regexp
-    if (this.indentRe) {
-      captures = this.indentRe.exec(this.input);
-    // determine regexp
-    } else {
-      // tabs
-      re = /^\n(\t*) */;
-      captures = re.exec(this.input);
-
-      // spaces
-      if (captures && !captures[1].length) {
-        re = /^\n( *)/;
-        captures = re.exec(this.input);
-      }
-
-      // established
-      if (captures && captures[1].length) this.indentRe = re;
-    }
-
+    var captures = this.scanIndentation();
 
     var indents = captures && captures[1].length;
     if (indents && (this.indentStack.length === 0 || indents > this.indentStack[0])) {
