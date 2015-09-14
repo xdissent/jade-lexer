@@ -415,7 +415,7 @@ Lexer.prototype = {
 
   text: function() {
     var tok = this.scan(/^(?:\| ?| )([^\n]+)/, 'text') ||
-      this.scan(/^\|?( )/, 'text');
+      this.scan(/^\|?(?: )()/, 'text');
     if (tok) {
       this.addText(tok.val);
       return true;
