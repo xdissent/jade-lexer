@@ -161,11 +161,11 @@ Lexer.prototype = {
       var newInput = this.input.substr(captures[0].length);
       if (newInput[0] === ':') {
         this.input = newInput;
-        return this.tok(type, captures[1]);
+        return this.tok(type, captures[1], captures[0].length);
       }
       if (/^[ \t]*(\n|$)/.test(newInput)) {
         this.input = newInput.substr(/^[ \t]*/.exec(newInput)[0].length);
-        return this.tok(type, captures[1]);
+        return this.tok(type, captures[1], captures[0].length);
       }
     }
   },
@@ -347,6 +347,7 @@ Lexer.prototype = {
     var tok = this.scan(/^\.(\-?[_a-z][_a-z0-9\-]*)/i, 'class');
     if (tok) {
       this.tokens.push(tok);
+      this.incrementColumn(tok.val.length);
       return true;
     }
     if (/^\.\-/i.test(this.input)) {
@@ -918,6 +919,8 @@ Lexer.prototype = {
           }
         }
       }
+
+      this.incrementColumn(index + 1);
 
       if ('/' == this.input.charAt(0)) {
         this.consume(1);
