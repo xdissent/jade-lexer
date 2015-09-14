@@ -1,2 +1,2 @@
-{"type":"include","line":1,"val":"/auxiliary/extends-from-root"}
-{"type":"eos","line":1}
+{"type":"include","line":1,"col":1,"val":"/auxiliary/extends-from-root"}
+{"type":"eos","line":1,"col":37}
