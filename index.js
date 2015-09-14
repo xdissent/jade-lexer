@@ -332,6 +332,7 @@ Lexer.prototype = {
     var tok = this.scan(/^#([\w-]+)/, 'id');
     if (tok) {
       this.tokens.push(tok);
+      this.incrementColumn(tok.val.length);
       return true;
     }
     if (/^#/.test(this.input)) {
