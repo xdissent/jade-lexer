@@ -776,6 +776,7 @@ Lexer.prototype = {
       tok.buffer = flags.charAt(0) === '=' || flags.charAt(1) === '=';
       if (tok.buffer) this.assertExpression(code);
       this.tokens.push(tok);
+      this.incrementColumn(captures[0].length);
       return true;
     }
   },
