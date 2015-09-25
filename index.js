@@ -273,6 +273,7 @@ Lexer.prototype = {
       var match = this.bracketExpression(1);
       this.consume(match.end + 1);
       this.tokens.push(this.tok('interpolation', match.src));
+      this.incrementColumn(match.end + 1);
       return true;
     }
   },
