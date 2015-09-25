@@ -631,17 +631,19 @@ Lexer.prototype = {
 
   call: function(){
 
-    var tok, captures;
+    var tok, captures, increment;
     if (captures = /^\+(\s*)(([-\w]+)|(#\{))/.exec(this.input)) {
       // try to consume simple or interpolated call
       if (captures[3]) {
         // simple call
-        this.consume(captures[0].length);
+        increment = captures[0].length;
+        this.consume(increment);
         tok = this.tok('call', captures[3]);
       } else {
         // interpolated call
         var match = this.bracketExpression(2 + captures[1].length);
-        this.consume(match.end + 1);
+        increment = match.end + 1;
+        this.consume(increment);
         this.assertExpression(match.src);
         tok = this.tok('call', '#{'+match.src+'}');
       }
@@ -650,6 +652,7 @@ Lexer.prototype = {
       if (captures = /^ *\(/.exec(this.input)) {
         var range = this.bracketExpression(captures[0].length - 1);
         if (!/^\s*[-\w]+ *=/.test(range.src)) { // not attributes
+          increment += range.end + 1;
           this.consume(range.end + 1);
           tok.args = range.src;
         }
@@ -658,6 +661,7 @@ Lexer.prototype = {
         }
       }
       this.tokens.push(tok);
+      this.incrementColumn(increment);
       return true;
     }
   },
