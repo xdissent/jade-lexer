@@ -953,6 +953,7 @@ Lexer.prototype = {
       var args = this.bracketExpression();
       this.consume(args.end + 1);
       this.tokens.push(this.tok('&attributes', args.src));
+      this.incrementColumn(args.end + 1);
       return true;
     }
   },
