@@ -1,6 +1,6 @@
 # jade-lexer
 
-The jade lexer.  This module is responsible for taking a string and converting it into an array of tokens.
+The jade lexer.  This module is responsible for taking a string and converting it into an array of tokens
 
 [![Build Status](https://img.shields.io/travis/jadejs/jade-lexer/master.svg)](https://travis-ci.org/jadejs/jade-lexer)
 [![Dependency Status](https://img.shields.io/gemnasium/jadejs/jade-lexer.svg)](https://gemnasium.com/jadejs/jade-lexer)
