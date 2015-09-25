@@ -4,11 +4,14 @@ var fs = require('fs');
 var assert = require('assert');
 var lex = require('../');
 var dir = __dirname + '/cases/';
-var hasErrors = true;
+var dirCount = 0;
+var hasCaseErrors = true;
+var caseErrorCount = 0;
 
 fs.readdirSync(dir).forEach(function (testCase) {
   if (/\.jade$/.test(testCase)) {
     console.dir(testCase);
+    dirCount++;
     var expected = fs.readFileSync(dir + testCase.replace(/\.jade$/, '.expected.json'), 'utf8')
                      .split(/\n/).map(JSON.parse);
     var result = lex(fs.readFileSync(dir + testCase, 'utf8'), dir + testCase);
@@ -20,12 +23,15 @@ fs.readdirSync(dir).forEach(function (testCase) {
       assert.deepEqual(expected, result);
     } catch (ex) {
       console.error(ex + '\n');
-      hasErrors = true;
+      hasCaseErrors = true;
+      caseErrorCount++;
     }
   }
 });
 
-if (hasErrors) throw new Error('Some test cases failed');
+if (hasCaseErrors) {
+  throw caseErrorCount + ' of ' + dirCount + ' test cases failed';
+}
 
 var edir = __dirname + '/errors/';
 
