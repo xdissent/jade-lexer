@@ -393,11 +393,14 @@ Lexer.prototype = {
       this.tokens.push(this.tok('start-jade-interpolation'));
       var child = new this.constructor(value.substr(indexOfStart + 2), this.filename, {
         interpolated: true,
+        startingColumn: this.colno + indexOfStart + 2,
         startingLine: this.lineno
       });
       var interpolated = child.getTokens();
       this.tokens = this.tokens.concat(interpolated);
+      this.incrementColumn(child.colno - this.colno);
       this.tokens.push(this.tok('end-jade-interpolation'));
+      this.incrementColumn(1);
       this.addText(child.input);
       return;
     }
@@ -407,6 +410,7 @@ Lexer.prototype = {
       }
       this.ended = true;
       this.input = value.substr(value.indexOf(']') + 1) + this.input;
+      this.incrementColumn(value.indexOf(']'));
       return;
     }
 
